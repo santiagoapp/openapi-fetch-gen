@@ -11,8 +11,8 @@
     "build": "tsc",
     "dev": "tsx watch src/cli.ts",
     "test": "jest",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint src/**/*.{js,ts} --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "npm run build"
   },
