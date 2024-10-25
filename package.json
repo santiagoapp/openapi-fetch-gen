@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint src/**/*.{js,ts} --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "gen": "node dist/cli.js -s schema.yaml -o generated --hooks react"
   },
   "keywords": [
     "openapi",
@@ -35,6 +36,7 @@
   ],
   "devDependencies": {
     "@types/jest": "^29.5.14",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.7.9",
     "@typescript-eslint/eslint-plugin": "^8.11.0",
     "@typescript-eslint/parser": "^8.11.0",
@@ -47,5 +49,8 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.19.1",
     "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
   }
 }
