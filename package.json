@@ -30,7 +30,8 @@
     "url": "git+https://github.com/santiagoapp/openapi-fetch-gen.git"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "devDependencies": {
     "@types/jest": "^29.5.14",
