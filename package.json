@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/cli.ts",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint .",
     "lint:fix": "eslint src/**/*.{js,ts} --fix",
     "format": "prettier --write \"src/**/*.ts\"",
