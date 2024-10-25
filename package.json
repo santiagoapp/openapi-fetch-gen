@@ -1,5 +1,5 @@
 {
-  "name": "santiagoapp/openapi-fetch-gen",
+  "name": "openapi-fetch-gen",
   "version": "0.1.4",
   "description": "OpenAPI TypeScript client generator with native fetch support",
   "main": "dist/index.js",
