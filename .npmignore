@@ -1,0 +1,13 @@
+node_modules/
+src/
+tests/
+.github/
+.gitignore
+.npmignore
+tsconfig.json
+jest.config.js
+*.test.ts
+*.spec.ts
+dist/
+generated/
+schema.json
