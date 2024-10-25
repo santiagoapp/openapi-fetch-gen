@@ -2,10 +2,10 @@ name: Node.js Package
 
 on:
   push:
-    branches: [ main ]
-    tags: [ 'v*' ]
+    branches: [main]
+    tags: ["v*"]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   quality:
@@ -14,26 +14,33 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
-          cache: 'npm'
-          
-      - run: npm ci
-      - run: npm run lint
-      - run: npm test
-      - run: npm run build
+          node-version: "18.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
 
   publish:
     needs: quality
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
+          node-version: "18.x"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
 
       - run: npm ci
       - run: npm run build
