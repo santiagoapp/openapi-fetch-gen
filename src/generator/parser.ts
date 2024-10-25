@@ -1,10 +1,10 @@
-import { OpenAPIV3 } from 'openapi-types';
-import { ParsedOperation } from '../types';
+import { OpenAPIV3 } from "openapi-types";
+import { ParsedOperation, OpenAPISchema } from "../types";
 
 export class SchemaParser {
-  private schema: OpenAPIV3.Document;
+  private schema: OpenAPISchema;
 
-  constructor(schema: OpenAPIV3.Document) {
+  constructor(schema: OpenAPISchema) {
     this.schema = schema;
   }
 
@@ -15,18 +15,28 @@ export class SchemaParser {
     for (const [path, pathItem] of Object.entries(paths)) {
       if (!pathItem) continue;
 
-      const methods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'] as const;
-      
+      const methods = [
+        "get",
+        "put",
+        "post",
+        "delete",
+        "options",
+        "head",
+        "patch",
+        "trace",
+      ] as const;
+
       for (const method of methods) {
         const operation = pathItem[method];
         if (operation) {
           operations.push({
-            operationId: operation.operationId || this.generateOperationId(path, method),
+            operationId:
+              operation.operationId || this.generateOperationId(path, method),
             path,
             method,
             parameters: operation.parameters as OpenAPIV3.ParameterObject[],
             requestBody: operation.requestBody as OpenAPIV3.RequestBodyObject,
-            responses: operation.responses
+            responses: operation.responses,
           });
         }
       }
@@ -36,10 +46,19 @@ export class SchemaParser {
   }
 
   private isHttpMethod(method: string): method is OpenAPIV3.HttpMethods {
-    return ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'].includes(method.toLowerCase());
+    return [
+      "get",
+      "put",
+      "post",
+      "delete",
+      "options",
+      "head",
+      "patch",
+      "trace",
+    ].includes(method.toLowerCase());
   }
 
   private generateOperationId(path: string, method: string): string {
-    return `${method}${path.replace(/\W+/g, '_')}`.toLowerCase();
+    return `${method}${path.replace(/\W+/g, "_")}`.toLowerCase();
   }
 }
