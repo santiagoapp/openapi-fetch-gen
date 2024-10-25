@@ -8,6 +8,7 @@ on:
   # Run `publish` job when a tag starting with "v" is pushed
   push:
     tags: ["v*"]
+    branches: [main]
 
 jobs:
   quality:
