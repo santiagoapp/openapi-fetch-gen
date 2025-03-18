@@ -1,6 +1,6 @@
 {
   "name": "openapi-fetch-gen",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "OpenAPI TypeScript client generator with native fetch support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,7 +15,7 @@
     "lint:fix": "eslint src/**/*.{js,ts} --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "npm run build",
-    "gen": "node dist/cli.js -s schema.yaml -o generated --hooks react"
+    "gen": "node dist/cli.js --base-url http://localhost:8000/api/v1/schema/ -o generated --hooks react"
   },
   "keywords": [
     "openapi",
