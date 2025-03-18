@@ -1,6 +1,7 @@
 import { ParsedOperation } from "../types";
 
 function generateQueryParams(operation: ParsedOperation): string {
+
   if (!operation.parameters?.length) return "";
 
   const queryParams = operation.parameters.filter(
@@ -23,20 +24,19 @@ function generateQueryParams(operation: ParsedOperation): string {
     url.search = queryParams.toString();
   }`;
 }
+// const url = new URL(\`\${window.BACKEND_URL}${path}\`);
 
 export function generateEndpoint(operation: ParsedOperation): string {
-  const { operationId, method, path } = operation;
+  const { operationId, method, path, requestBody } = operation;
 
   return `
 import type { ${operationId}Params, ${operationId}Response } from '../types/${operationId}.types';
-
 export type { ${operationId}Params, ${operationId}Response };
 
 export async function ${operationId}(
   params: ${operationId}Params = {}
 ): Promise<${operationId}Response> {
-  const url = new URL(\`\${process.env.API_BASE_URL}${path}\`);
-  
+  const url = new URL(\`\${window.BACKEND_URL}${path}\`);
   ${generateQueryParams(operation)}
 
   const response = await fetch(url.toString(), {
@@ -45,7 +45,7 @@ export async function ${operationId}(
       'Content-Type': 'application/json',
       ...params.headers
     },
-    ${method.toLowerCase() !== "get" ? "body: JSON.stringify(params.body)," : ""}
+    ${method.toLowerCase() !== "get" && requestBody ? "body: JSON.stringify(params.body)," : ""}
   });
 
   if (!response.ok) {
