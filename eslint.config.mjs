@@ -32,7 +32,7 @@ export default [{
     },
 
     rules: {
-        "no-console": "warn",
+        "no-console": "off",
         "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/no-explicit-any": "warn",
         "@typescript-eslint/no-unused-vars": "error",

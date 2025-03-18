@@ -112,8 +112,6 @@ async function main() {
     const parser = new SchemaParser(schema);
     const operations = await parser.parseSchema();
 
-    console.log("operations", JSON.stringify(operations));
-
     // Generate code
     const generator = new CodeGenerator(config);
     await generator.generate(operations);

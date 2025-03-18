@@ -11,7 +11,7 @@ function generateParamsInterface(operation: ParsedOperation): string {
       .forEach((param) => {
         const schema = (param as OpenAPIV3.ParameterObject)
           .schema as OpenAPIV3.SchemaObject;
-        parts.push(`${param.name}?: ${getTypeFromSchema(schema)};`);
+        parts.push(`${param.name}?: ${getTypeFromSchema(schema, true)};`);
       });
   }
 
@@ -20,7 +20,7 @@ function generateParamsInterface(operation: ParsedOperation): string {
     const content = operation.requestBody.content?.["application/json"];
     if (content?.schema) {
       parts.push(
-        `body?: ${getTypeFromSchema(content.schema as OpenAPIV3.SchemaObject)};`
+        `body?: ${getTypeFromSchema(content.schema as OpenAPIV3.SchemaObject, true)};`
       );
     }
   }
@@ -44,10 +44,10 @@ function generateResponseInterface(operation: ParsedOperation): string {
   }
 
   const schema = content.schema as OpenAPIV3.SchemaObject;
-  return `= ${getTypeFromSchema(schema)}`;
+  return `= ${getTypeFromSchema(schema, false)}`;
 }
 
-function getTypeFromSchema(schema: OpenAPIV3.SchemaObject): string {
+function getTypeFromSchema(schema: OpenAPIV3.SchemaObject, isParamMethod: boolean): string {
   switch (schema.type) {
     case "string":
       return "string";
@@ -59,7 +59,8 @@ function getTypeFromSchema(schema: OpenAPIV3.SchemaObject): string {
     case "array": {
       if (schema.items) {
         const itemType = getTypeFromSchema(
-          schema.items as OpenAPIV3.SchemaObject
+          schema.items as OpenAPIV3.SchemaObject,
+          isParamMethod
         );
         return `Array<${itemType}>`;
       }
@@ -71,7 +72,12 @@ function getTypeFromSchema(schema: OpenAPIV3.SchemaObject): string {
           .map(([key, prop]) => {
             const propSchema = prop as OpenAPIV3.SchemaObject;
             const required = schema.required?.includes(key);
-            return `  ${key}${required ? "" : "?"}: ${getTypeFromSchema(propSchema)};`;
+            const type = `  ${key}${required ? "" : "?"}: ${getTypeFromSchema(propSchema, isParamMethod)};`
+            if (isParamMethod && propSchema.readOnly || !isParamMethod && propSchema.writeOnly) {
+              return
+            }
+
+            return type;
           })
           .join("\n");
         return `{
