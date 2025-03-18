@@ -11,6 +11,7 @@ import {
   SchemaObject,
   ReferenceObject,
 } from "./types";
+import { url } from "inspector";
 
 // OpenAPI specific types
 
@@ -61,10 +62,10 @@ function resolveReferences(
   return obj;
 }
 
-async function parseYamlSchema(filePath: string): Promise<OpenAPISchema> {
+async function parseYamlSchema(schemaYaml: string): Promise<OpenAPISchema> {
   try {
-    const content = await fs.readFile(filePath, "utf-8");
-    const schema = yaml.load(content) as OpenAPISchema;
+    // const content = await fs.readFile(filePath, "utf-8");
+    const schema = yaml.load(schemaYaml) as OpenAPISchema;
 
     if (!schema.openapi || !schema.info || !schema.paths) {
       throw new Error(
@@ -85,13 +86,19 @@ async function parseYamlSchema(filePath: string): Promise<OpenAPISchema> {
   }
 }
 
+async function getSchemaPath(baseUrl: string): Promise<string> {
+  const response = await fetch(baseUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch schema: ${response.statusText}`);
+  }
+  return await response.text();
+}
+
 async function main() {
   const opts = program.opts();
-
   try {
-    // Read and parse schema
-    const schemaPath = path.resolve(process.cwd(), opts.schema);
-    const schema = await parseYamlSchema(schemaPath);
+    const schemaYaml = await getSchemaPath(opts.baseUrl);
+    const schema = await parseYamlSchema(schemaYaml);
 
     // Configure generator
     const config: GeneratorConfig = {
@@ -130,8 +137,8 @@ const program = new Command()
   .name("openapi-fetch-gen")
   .description("Generate TypeScript API client from OpenAPI schema")
   .version("0.1.0")
-  .requiredOption("-s, --schema <path>", "OpenAPI schema path (YAML)")
   .requiredOption("-o, --output <path>", "Output directory")
+  .option("-s, --schema <path>", "OpenAPI schema path (YAML)")
   .option("--base-url <url>", "Base URL for the API")
   .option(
     "--hooks <types>",

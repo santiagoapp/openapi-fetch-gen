@@ -15,7 +15,7 @@
     "lint:fix": "eslint src/**/*.{js,ts} --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "npm run build",
-    "gen": "node dist/cli.js -s schema.yaml -o generated --hooks react"
+    "gen": "node dist/cli.js --base-url http://localhost:8000/api/v1/schema/ -o generated --hooks react"
   },
   "keywords": [
     "openapi",
