@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import path from "path";
-import fs from "fs/promises";
 import yaml from "js-yaml";
 import { SchemaParser } from "./generator/parser";
 import { CodeGenerator } from "./generator/generator";
@@ -11,7 +10,6 @@ import {
   SchemaObject,
   ReferenceObject,
 } from "./types";
-import { url } from "inspector";
 
 // OpenAPI specific types
 
