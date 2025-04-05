@@ -3,7 +3,6 @@ import { ParsedOperation } from "../types";
 function generateQueryParams(operation: ParsedOperation): string {
 
   if (!operation.parameters?.length) return "";
-
   const queryParams = operation.parameters.filter(
     (param) => param.in === "path"
   );
