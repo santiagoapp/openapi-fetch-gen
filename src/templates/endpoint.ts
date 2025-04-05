@@ -1,29 +1,29 @@
 import { ParsedOperation } from "../types";
 
-function generateQueryParams(operation: ParsedOperation): string {
+// function generateQueryParams(operation: ParsedOperation): string {
 
-  if (!operation.parameters?.length) return "";
+//   if (!operation.parameters?.length) return "";
 
-  const queryParams = operation.parameters.filter(
-    (param) => param.in === "path"
-  );
-  if (queryParams.length === 0) return "";
+//   const queryParams = operation.parameters.filter(
+//     (param) => param.in === "path"
+//   );
+//   if (queryParams.length === 0) return "";
 
-  return `
-  // Add query parameters
-  const queryParams = new URLSearchParams();
-  ${queryParams
-    .map(
-      (param) => `
-  if (params.${param.name} != null) {
-    queryParams.append('${param.name}', String(params.${param.name}));
-  }`
-    )
-    .join("\n")}
-  if (queryParams.toString()) {
-    url.search = queryParams.toString();
-  }`;
-}
+//   return `
+//   // Add query parameters
+//   const queryParams = new URLSearchParams();
+//   ${queryParams
+//       .map(
+//         (param) => `
+//   if (params.${param.name} != null) {
+//     queryParams.append('${param.name}', String(params.${param.name}));
+//   }`
+//       )
+//       .join("\n")}
+//   if (queryParams.toString()) {
+//     url.search = queryParams.toString();
+//   }`;
+// }
 // const url = new URL(\`\${window.BACKEND_URL}${path}\`);
 
 export function generateEndpoint(operation: ParsedOperation): string {
@@ -37,10 +37,10 @@ export async function ${operationId}(
   params: ${operationId}Params = {}
 ): Promise<${operationId}Response> {
   const url = new URL(\`\${window.BACKEND_URL}${path}\`);
-  ${generateQueryParams(operation)}
 
   const response = await fetch(url.toString(), {
     method: '${method.toUpperCase()}',
+    ...params,
     headers: {
       'Content-Type': 'application/json',
       ...params.headers
