@@ -5,7 +5,7 @@ function generateQueryParams(operation: ParsedOperation): string {
   if (!operation.parameters?.length) return "";
 
   const queryParams = operation.parameters.filter(
-    (param) => param.in === "query"
+    (param) => param.in === "path"
   );
   if (queryParams.length === 0) return "";
 
