@@ -7,7 +7,7 @@ function generateParamsInterface(operation: ParsedOperation): string {
   // Add query parameters
   if (operation.parameters) {
     operation.parameters
-      .filter((param) => param.in === "query")
+      .filter((param) => param.in === "path")
       .forEach((param) => {
         const schema = (param as OpenAPIV3.ParameterObject)
           .schema as OpenAPIV3.SchemaObject;
