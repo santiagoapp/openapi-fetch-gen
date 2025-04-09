@@ -4,14 +4,15 @@ import { ParsedOperation } from "../types";
 function generateParamsInterface(operation: ParsedOperation): string {
   const parts: string[] = [];
 
-  // Add query parameters
+  // Add path parameters
   if (operation.parameters) {
     operation.parameters
       .filter((param) => param.in === "path")
       .forEach((param) => {
         const schema = (param as OpenAPIV3.ParameterObject)
           .schema as OpenAPIV3.SchemaObject;
-        parts.push(`${param.name}?: ${getTypeFromSchema(schema, true)};`);
+        // Path parameters are always required by OpenAPI spec
+        parts.push(`${param.name}: ${getTypeFromSchema(schema, true)}; // path parameter`);
       });
   }
 
