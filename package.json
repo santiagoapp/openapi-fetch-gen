@@ -1,6 +1,6 @@
 {
   "name": "openapi-fetch-gen",
-  "version": "0.2.14",
+  "version": "0.2.15",
   "description": "OpenAPI TypeScript client generator with native fetch support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
