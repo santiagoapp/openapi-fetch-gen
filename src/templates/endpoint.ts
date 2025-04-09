@@ -9,13 +9,16 @@ import { OpenAPIV3 } from 'openapi-types';
  */
 export function generateEndpoint(operation: ParsedOperation): string {
 
-  const { operationId, method, path, requestBody } = operation;
+  const { operationId, method, path, requestBody, parameters } = operation;
 
   // Extract path parameter names from the URL path (e.g., {id} -> id)
   const pathParamNames = extractPathParameters(path);
 
+  // Generate function parameters for required path parameters
+  const functionParams = generateFunctionParams(pathParamNames, operationId, parameters);
+
   // Generate code for handling path parameters and constructing the URL
-  const urlConstructionCode = generateUrlCode(path, pathParamNames);
+  const urlConstructionCode = generateUrlCode(path, pathParamNames, functionParams.hasRequiredParams);
 
   // Generate the complete endpoint function
   return `
@@ -26,7 +29,7 @@ export type { ${operationId}Params, ${operationId}Response };
  * ${getOperationDescription(operationId, method, path)}
  */
 export async function ${operationId}(
-  params: ${operationId}Params = {}
+  ${functionParams.paramsString}
 ): Promise<${operationId}Response> {${urlConstructionCode}
 
   // Configure the fetch request
@@ -61,25 +64,84 @@ function extractPathParameters(path: string): string[] {
 }
 
 /**
+ * Generates function parameters for required path parameters
+ */
+function generateFunctionParams(pathParamNames: string[], operationId: string, parameters?: OpenAPIV3.ParameterObject[]): { paramsString: string; hasRequiredParams: boolean } {
+  if (!pathParamNames.length) {
+    return {
+      paramsString: `params: ${operationId}Params = {}`,
+      hasRequiredParams: false
+    };
+  }
+
+  // Extract parameter types from OpenAPI parameters
+  const paramTypes: Record<string, string> = {};
+  if (parameters) {
+    parameters
+      .filter(param => param.in === 'path')
+      .forEach(param => {
+        const schema = param.schema as OpenAPIV3.SchemaObject;
+        paramTypes[param.name] = getTypeFromSchema(schema);
+      });
+  }
+
+  // Generate required parameters as explicit function parameters
+  const requiredParams = pathParamNames.map(name => {
+    const type = paramTypes[name] || 'string';
+    return `${name}: ${type}`;
+  }).join(', ');
+
+  return {
+    paramsString: `${requiredParams}, params: Omit<${operationId}Params, ${pathParamNames.map(p => `'${p}'`).join(' | ')}> = {}`,
+    hasRequiredParams: true
+  };
+}
+
+/**
+ * Gets TypeScript type from OpenAPI schema
+ */
+function getTypeFromSchema(schema?: OpenAPIV3.SchemaObject): string {
+  if (!schema) return 'string';
+
+  switch (schema.type) {
+    case 'string': return 'string';
+    case 'number':
+    case 'integer': return 'number';
+    case 'boolean': return 'boolean';
+    default: return 'string';
+  }
+}
+
+/**
  * Generates code for URL construction and path parameter validation
  */
-function generateUrlCode(path: string, pathParamNames: string[]): string {
+function generateUrlCode(path: string, pathParamNames: string[], hasRequiredParams: boolean): string {
   if (pathParamNames.length === 0) {
     return `
   const url = new URL(\`\${window.BACKEND_URL}${path}\`);`;
   }
 
-  return `
+  if (hasRequiredParams) {
+    return `
   // Replace path parameters in URL
   let pathUrl = "${path}";
   ${pathParamNames.map(paramName => {
-    return `// Path parameter '${paramName}' is required
+      return `pathUrl = pathUrl.replace('{${paramName}}', encodeURIComponent(String(${paramName})));`;
+    }).join('\n  ')}
+  const url = new URL(\`\${window.BACKEND_URL}\${pathUrl}\`);`;
+  } else {
+    return `
+  // Replace path parameters in URL
+  let pathUrl = "${path}";
+  ${pathParamNames.map(paramName => {
+      return `// Path parameter '${paramName}' is required
   if (params.${paramName} === undefined || params.${paramName} === null) {
     throw new Error(\`Path parameter '${paramName}' is required\`);
   }
   pathUrl = pathUrl.replace('{${paramName}}', encodeURIComponent(String(params.${paramName})));`;
-  }).join('\n  ')}
+    }).join('\n  ')}
   const url = new URL(\`\${window.BACKEND_URL}\${pathUrl}\`);`;
+  }
 }
 
 /**
@@ -97,5 +159,13 @@ function generateRequestBodyCode(method: string, requestBody?: OpenAPIV3.Request
  */
 function getOperationDescription(operationId: string, method: string, path: string): string {
   const methodUpperCase = method.toUpperCase();
-  return `Makes a ${methodUpperCase} request to ${path}`;
+  const pathParams = extractPathParameters(path);
+
+  if (pathParams.length === 0) {
+    return `Makes a ${methodUpperCase} request to ${path}`;
+  }
+
+  const paramsDescription = pathParams.map(param => `@param {string} ${param} - Required path parameter`).join('\n * ');
+
+  return `Makes a ${methodUpperCase} request to ${path}\n * \n * ${paramsDescription}`;
 }
